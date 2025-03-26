@@ -1,17 +1,16 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import {IDiamondLoupe} from "../interfaces/IDiamondLoupe.sol"; 
+import {IDiamondLoupe} from "../interfaces/IDiamondLoupe.sol";
 
 /// @title DiamondLoupeFacet
 /// @notice This facet provides functions for retrieving the facets and their selectors
 /// used by a Diamond contract, as well as checking the interfaces supported by the Diamond.
 /// It implements the DiamondLoupe and ERC-165 standards.
 contract DiamondLoupeFacet is IDiamondLoupe {
-
     // This mapping stores the function selectors for each facet address
     mapping(address => bytes4[]) public facetFunctionSelectorsMap;
-    
+
     // This array stores the addresses of all the facets
     address[] public facetAddressesList;
 
@@ -46,7 +45,7 @@ contract DiamondLoupeFacet is IDiamondLoupe {
     /// @param _functionSelector The function selector whose facet address is to be fetched
     /// @return facet_ The address of the facet that supports the provided function selector
     function facetAddress(bytes4 _functionSelector) external view override returns (address facet_) {
-        for (uint i = 0; i < facetAddressesList.length; i++) {
+        for (uint256 i = 0; i < facetAddressesList.length; i++) {
             if (_functionSelector == facetFunctionSelectorsMap[facetAddressesList[i]][0]) {
                 facet_ = facetAddressesList[i];
                 break;

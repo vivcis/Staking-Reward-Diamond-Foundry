@@ -3,14 +3,13 @@ pragma solidity ^0.8.0;
 
 import {IRewardFacet} from "../interfaces/IRewardFacet.sol";
 import {AppStorage} from "../libraries/AppStorage.sol";
-import {IERC20} from "../interfaces/IERC20.sol";  
+import {IERC20} from "../interfaces/IERC20.sol";
 
 /// @title ERC20RewardFacet
 /// @notice This contract allows users to stake, withdraw, and claim rewards from ERC20 tokens.
 ///         It also distributes rewards based on the total amount of tokens staked (ERC20, ERC721, ERC1155).
 /// @dev This contract interacts with the AppStorage to store information about staking and rewards.
 contract ERC20RewardFacet is IRewardFacet {
-
     /// @notice Stake ERC20 tokens into the contract
     /// @dev Transfers ERC20 tokens from the user's address to the contract and updates the staking record
     /// @param token The address of the ERC20 token being staked
@@ -20,10 +19,10 @@ contract ERC20RewardFacet is IRewardFacet {
 
         // Transfer ERC20 token to contract
         IERC20(token).transferFrom(msg.sender, address(this), amount);
-        
+
         // Update staking record
         s.stakesERC20[msg.sender] += amount;
-        
+
         // Update total staked ERC20 tokens
         s.totalStakedERC20 += amount;
     }
@@ -56,11 +55,11 @@ contract ERC20RewardFacet is IRewardFacet {
         uint256 totalStaked = s.totalStakedERC20 + s.totalStakedERC721 + s.totalStakedERC1155;
         require(totalStaked > 0, "No tokens staked");
 
-        uint256 rewardAmount = s.rewardRate * totalStaked;  
-        
+        uint256 rewardAmount = s.rewardRate * totalStaked;
+
         // Transfer reward token from sender to this contract
         require(IERC20(rewardToken).transferFrom(msg.sender, address(this), rewardAmount), "Transfer failed");
-        
+
         // Update reward per stake
         s.rewardPerStake += rewardAmount / totalStaked;
     }
@@ -71,12 +70,12 @@ contract ERC20RewardFacet is IRewardFacet {
     function claimRewards(address rewardToken) external override {
         AppStorage.Storage storage s = AppStorage.getStorage();
         uint256 reward = s.rewardPerStake * s.stakesERC20[msg.sender];
-        
+
         // Add the rewards from ERC721 and ERC1155 stakes
         // Iterate over all ERC721 and ERC1155 stakes
         uint256 erc721Reward = 0;
         uint256 erc1155Reward = 0;
-        
+
         // Calculate ERC721 rewards
         for (uint256 tokenId = 0; tokenId < s.totalStakedERC721; tokenId++) {
             erc721Reward += s.stakesERC721[msg.sender][tokenId];

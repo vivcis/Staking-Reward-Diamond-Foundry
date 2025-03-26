@@ -34,7 +34,13 @@ interface IERC1155 {
     /// @param ids The array of token IDs being transferred
     /// @param amounts The array of token amounts being transferred
     /// @param data Additional data passed to the recipient (if needed)
-    function safeBatchTransferFrom(address from, address to, uint256[] memory ids, uint256[] memory amounts, bytes calldata data) external;
+    function safeBatchTransferFrom(
+        address from,
+        address to,
+        uint256[] memory ids,
+        uint256[] memory amounts,
+        bytes calldata data
+    ) external;
 
     /// @notice Emitted when a single transfer of tokens occurs
     /// @dev This event is emitted after a successful transfer of a specific token ID from one address to another.
@@ -52,7 +58,9 @@ interface IERC1155 {
     /// @param to The address to which the tokens were transferred
     /// @param ids The array of token IDs being transferred
     /// @param values The array of token amounts being transferred
-    event TransferBatch(address indexed operator, address indexed from, address indexed to, uint256[] ids, uint256[] values);
+    event TransferBatch(
+        address indexed operator, address indexed from, address indexed to, uint256[] ids, uint256[] values
+    );
 
     /// @notice Emitted when an account is approved to manage another account's tokens
     /// @dev This event is triggered when an account (`operator`) is approved or revoked as an operator for another account (`account`).

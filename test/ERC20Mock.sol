@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import {IERC20} from "../contracts/interfaces/IERC20.sol";  
+import {IERC20} from "../contracts/interfaces/IERC20.sol";
 
 contract ERC20Mock is IERC20 {
     string public name = "Mock ERC20";

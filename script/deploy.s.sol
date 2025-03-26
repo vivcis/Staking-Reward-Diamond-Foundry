@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-// import {Diamond} from "../contracts/Diamond.sol";  
-// import {StakingFacet} from "../contracts/facets/StakingFacet.sol";  
-// import {ERC20RewardFacet} from "../contracts/facets/ERC20Facet.sol";  
+// import {Diamond} from "../contracts/Diamond.sol";
+// import {StakingFacet} from "../contracts/facets/StakingFacet.sol";
+// import {ERC20RewardFacet} from "../contracts/facets/ERC20Facet.sol";
 // import {DiamondLoupeFacet} from "../contracts/facets/DiamondLoupeFacet.sol";
-// import {IDiamondCut} from "../contracts/interfaces/IDiamondCut.sol";  
+// import {IDiamondCut} from "../contracts/interfaces/IDiamondCut.sol";
 
 // /// @title Deploy Contract
 // /// @notice This contract is used for deploying and initializing the Diamond contract with facets.
@@ -22,11 +22,11 @@ pragma solidity ^0.8.0;
 //     function run() public {
 //         // Deploy the Diamond contract
 //         diamond = new Diamond();
-        
+
 //         // Deploy facets
 //         stakingFacet = new StakingFacet();
 //         rewardFacet = new ERC20RewardFacet();
-//         diamondLoupeFacet = new DiamondLoupeFacet();  
+//         diamondLoupeFacet = new DiamondLoupeFacet();
 
 //         // Initialize facets (like setting the reward rate in AppStorage)
 //         stakingFacet.initialize(1000); // Set the reward rate (or any other initialization needed)

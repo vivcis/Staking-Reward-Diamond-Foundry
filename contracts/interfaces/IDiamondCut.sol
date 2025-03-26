@@ -9,16 +9,17 @@ interface IDiamondCut {
     /// @param functionSelectors The list of function selectors to be added or removed from the facet
     struct FacetCut {
         address facetAddress; // The address of the facet to add/remove/replace
-        uint8 action;  // Action to perform: Add, Replace, Remove
+        uint8 action; // Action to perform: Add, Replace, Remove
         bytes4[] functionSelectors; // List of function selectors associated with the facet
     }
 
     /// @notice Enum for the facet cut actions (Add, Replace, Remove)
     /// @dev Used in the `diamondCut` function to specify the action for the facet
-    enum FacetCutAction { 
-        Add,    // Add a facet and function selectors
+    enum FacetCutAction {
+        Add, // Add a facet and function selectors
         Replace, // Replace an existing facet or function selectors
-        Remove   // Remove a facet or function selectors
+        Remove // Remove a facet or function selectors
+
     }
 
     /// @notice Perform a diamond cut operation (add/remove facets)
@@ -27,9 +28,5 @@ interface IDiamondCut {
     /// @param _diamondCut An array of `FacetCut` structs specifying the facets to add/remove/replace
     /// @param _init The address to initialize the diamond cut. Can be set to address(0) if no initialization is required.
     /// @param _calldata The calldata to pass to the initializer address if needed.
-    function diamondCut(
-        FacetCut[] calldata _diamondCut, 
-        address _init, 
-        bytes calldata _calldata
-    ) external;
+    function diamondCut(FacetCut[] calldata _diamondCut, address _init, bytes calldata _calldata) external;
 }

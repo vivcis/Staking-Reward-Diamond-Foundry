@@ -6,11 +6,10 @@ import {AppStorage} from "../libraries/AppStorage.sol";
 import {IStakingFacet} from "../interfaces/IStakingFacet.sol";
 
 /// @title ERC1155Facet
-/// @notice This contract allows users to stake and withdraw ERC1155 tokens. 
+/// @notice This contract allows users to stake and withdraw ERC1155 tokens.
 ///         It implements the staking logic for ERC1155 tokens within the diamond contract.
 /// @dev The contract interacts with the AppStorage to track staking records and total staked tokens.
 abstract contract ERC1155Facet is IStakingFacet {
-
     /// @notice Stake ERC1155 tokens into the contract
     /// @dev Transfers the specified ERC1155 token from the user's address to the contract's address
     ///      and updates the staking record for the user.
@@ -59,7 +58,7 @@ abstract contract ERC1155Facet is IStakingFacet {
         // Iterate over all users (note: you need to have a list of users, this is an example)
         // Here I'm assuming you have a list of users stored in an array or another method
         for (uint256 i = 0; i < someListOfUsers.length; i++) {
-            address user = someListOfUsers[i];  // You need to define or maintain this list of users
+            address user = someListOfUsers[i]; // You need to define or maintain this list of users
 
             // Calculate rewards based on user's stake
             uint256 erc1155Reward = 0;

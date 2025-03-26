@@ -22,7 +22,7 @@ contract StakingDiamondTest is Test {
     function setUp() public {
         // Deploy the Diamond contract
         diamond = new Diamond();
-        
+
         // Deploy facets
         stakingFacet = new StakingFacet();
         rewardFacet = new ERC20RewardFacet();
@@ -32,8 +32,8 @@ contract StakingDiamondTest is Test {
         stakingFacet.initialize(1000);
 
         // Create an array to hold facet addresses
-        facets = new address ;
-        
+        facets = new address;
+
         // Add the facet addresses to the facets array
         facets[0] = address(stakingFacet);
         facets[1] = address(rewardFacet);
@@ -66,7 +66,7 @@ contract StakingDiamondTest is Test {
         assert(finalBalance > initialBalance);
 
         //ensure the balance increased by 100
-        assert(finalBalance == initialBalance + 100); 
+        assert(finalBalance == initialBalance + 100);
     }
 
     // Test 2: Withdraw staked ERC20 tokens
@@ -216,9 +216,8 @@ contract StakingDiamondTest is Test {
 
     // Test 12: Stake ERC721 tokens and withdraw them
     function testStakeAndWithdrawERC721() public {
-
         //deploy ERC721 token
-        ERC721Mock token = new ERC721Mock();  
+        ERC721Mock token = new ERC721Mock();
         uint256 tokenId = 1;
 
         //mint the ERC721 token

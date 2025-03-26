@@ -3,7 +3,7 @@ pragma solidity ^0.8.0;
 
 interface IERC721 {
     /// @notice Returns the number of tokens owned by a specific address
-    /// @dev This function provides the number of tokens that an address owns. 
+    /// @dev This function provides the number of tokens that an address owns.
     /// @param owner The address whose token balance is being queried
     /// @return balance The number of tokens owned by the specified address
     function balanceOf(address owner) external view returns (uint256);
@@ -15,7 +15,7 @@ interface IERC721 {
     function ownerOf(uint256 tokenId) external view returns (address);
 
     /// @notice Safely transfers a token from one address to another
-    /// @dev This function transfers the ownership of a token from one address to another, 
+    /// @dev This function transfers the ownership of a token from one address to another,
     ///      checking that the recipient is capable of receiving the token.
     /// @param from The address transferring the token
     /// @param to The address receiving the token
@@ -23,7 +23,7 @@ interface IERC721 {
     function safeTransferFrom(address from, address to, uint256 tokenId) external;
 
     /// @notice Transfers a token from one address to another
-    /// @dev This function transfers the ownership of a token from one address to another 
+    /// @dev This function transfers the ownership of a token from one address to another
     ///      without any safety checks.
     /// @param from The address transferring the token
     /// @param to The address receiving the token

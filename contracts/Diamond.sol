@@ -49,8 +49,8 @@ contract Diamond is IDiamondProxy {
     /// @param _data The data to be passed along with the delegate call
     function delegateCall(address _facet, bytes calldata _data) external override {
         // Delegate the call to the facet
-        (bool success, ) = _facet.delegatecall(_data);
-        
+        (bool success,) = _facet.delegatecall(_data);
+
         // Require that the delegate call succeeds
         require(success, "DiamondProxy: Delegate call failed");
     }
@@ -70,7 +70,7 @@ contract Diamond is IDiamondProxy {
 
         // Add the facet address to the facetAddressesList if not already present
         bool exists = false;
-        for (uint i = 0; i < facetAddressesList.length; i++) {
+        for (uint256 i = 0; i < facetAddressesList.length; i++) {
             if (facetAddressesList[i] == _facetAddress) {
                 exists = true;
                 break;
@@ -119,7 +119,7 @@ contract Diamond is IDiamondProxy {
     // Internal function to remove a function selector from a facet's selector list
     function _removeFromFacetSelectorList(address _facetAddress, bytes4 _selector) internal {
         bytes4[] storage selectors = facetFunctionSelectors[_facetAddress];
-        
+
         for (uint256 i = 0; i < selectors.length; i++) {
             if (selectors[i] == _selector) {
                 // Swap the element to be removed with the last one, then pop

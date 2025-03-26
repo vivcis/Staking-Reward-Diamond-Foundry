@@ -7,7 +7,6 @@ import {IDiamondCut} from "./interfaces/IDiamondCut.sol"; // Interface for Diamo
 /// @notice This contract is a proxy for interacting with a Diamond contract.
 /// @dev The contract uses the `delegatecall` mechanism to forward function calls to the Diamond contract.
 contract DiamondProxy {
-
     // The address of the Diamond contract
     address public diamond;
 
@@ -27,7 +26,7 @@ contract DiamondProxy {
     ///      It forwards the call to the Diamond contract using `delegatecall`.
     ///      The state of the Diamond contract is modified as if the call was made to the Diamond contract itself.
     fallback() external payable {
-        (bool success, ) = diamond.delegatecall(msg.data);
+        (bool success,) = diamond.delegatecall(msg.data);
         require(success, "DiamondProxy: Delegated call failed");
     }
 

@@ -1,16 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import {IERC721} from "../interfaces/IERC721.sol";  
+import {IERC721} from "../interfaces/IERC721.sol";
 import {AppStorage} from "../libraries/AppStorage.sol";
 import {IStakingFacet} from "../interfaces/IStakingFacet.sol";
 
 /// @title ERC721Facet
-/// @notice This contract allows users to stake and withdraw ERC721 tokens. 
+/// @notice This contract allows users to stake and withdraw ERC721 tokens.
 ///         It implements the staking logic for ERC721 tokens within the diamond contract.
 /// @dev The contract interacts with the AppStorage to track staking records and total staked tokens.
 abstract contract ERC721Facet is IStakingFacet {
-
     /// @notice Stake an ERC721 token into the contract
     /// @dev Transfers the specified ERC721 token from the user's address to the contract's address
     ///      and updates the staking record for the user.
