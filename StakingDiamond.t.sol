@@ -29,7 +29,7 @@ contract StakingDiamondTest is Test {
         DiamondLoupeFacet diamondLoupeFacet = new DiamondLoupeFacet();
 
         // Initialize facets (like setting the reward rate in AppStorage)
-        stakingFacet.initialize(1000); // Set the reward rate (or any other initialization needed)
+        stakingFacet.initialize(1000);
 
         // Create an array to hold facet addresses
         facets = new address ;
@@ -64,7 +64,9 @@ contract StakingDiamondTest is Test {
 
         // Ensure that the balance increased after claiming rewards
         assert(finalBalance > initialBalance);
-        assert(finalBalance == initialBalance + 100); // Ensure rewards are added
+
+        //ensure the balance increased by 100
+        assert(finalBalance == initialBalance + 100); 
     }
 
     // Test 2: Withdraw staked ERC20 tokens
@@ -160,7 +162,8 @@ contract StakingDiamondTest is Test {
         try stakingFacet.withdrawERC20(address(rewardToken), 200) {
             fail("Expected error not thrown");
         } catch (bytes memory) {
-            // Expected error occurred
+            //ensure error is thrown
+            assert(true);
         }
     }
 
@@ -178,7 +181,7 @@ contract StakingDiamondTest is Test {
         address initialFacet = facets[0];
         diamond.diamondCut(facets);
 
-        assert(facets[0] != initialFacet); // Ensure facet was replaced
+        assert(facets[0] != initialFacet);
     }
 
     // Test 10: Verify total staked tokens
@@ -213,10 +216,12 @@ contract StakingDiamondTest is Test {
 
     // Test 12: Stake ERC721 tokens and withdraw them
     function testStakeAndWithdrawERC721() public {
-        ERC721Mock token = new ERC721Mock();  // Deploy ERC721Mock
+
+        //deploy ERC721 token
+        ERC721Mock token = new ERC721Mock();  
         uint256 tokenId = 1;
 
-        // Mint the ERC721 token
+        //mint the ERC721 token
         token.mint(address(this), tokenId);
 
         // Stake ERC721 token
