@@ -1,22 +1,38 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+/******************************************************************************\
+* Author: Nick Mudge <nick@perfectabstractions.com> (https://twitter.com/mudgen)
+* EIP-2535 Diamonds: https://eips.ethereum.org/EIPS/eip-2535
+/******************************************************************************/
+
+// A loupe is a small magnifying glass used to look at diamonds.
+// These functions look at diamonds
 interface IDiamondLoupe {
-    /// @notice Gets all the facet addresses used by a Diamond contract
-    /// @dev This function returns the addresses of all facets that have been added to the diamond.
-    /// @return facetAddresses_ An array of addresses of the facets in the Diamond contract
-    function facetAddresses() external view returns (address[] memory);
+    /// These functions are expected to be called frequently
+    /// by tools.
 
-    /// @notice Gets the function selectors provided by a specific facet
-    /// @dev This function returns a list of function selectors that are defined in a given facet address.
-    /// @param _facetAddress The address of the facet to query
-    /// @return facetFunctionSelectors_ An array of bytes4 selectors that belong to the specified facet
-    function facetFunctionSelectors(address _facetAddress) external view returns (bytes4[] memory);
+    struct Facet {
+        address facetAddress;
+        bytes4[] functionSelectors;
+    }
 
-    /// @notice Gets the facet address that supports the given function selector
-    /// @dev This function helps identify which facet is responsible for implementing a given function
-    ///      based on its selector. If the function is not found, it returns address(0).
-    /// @param _functionSelector The function selector to query for
-    /// @return facet_ The address of the facet that implements the function corresponding to the selector
-    function facetAddress(bytes4 _functionSelector) external view returns (address facet_);
+    /// @notice Gets all facet addresses and their four byte function selectors.
+    /// @return facets_ Facet
+    function facets() external view returns (Facet[] memory facets_);
+
+    /// @notice Gets all the function selectors supported by a specific facet.
+    /// @param _facet The facet address.
+    /// @return facetFunctionSelectors_
+    function facetFunctionSelectors(address _facet) external view returns (bytes4[] memory facetFunctionSelectors_);
+
+    /// @notice Get all the facet addresses used by a diamond.
+    /// @return facetAddresses_
+    function facetAddresses() external view returns (address[] memory facetAddresses_);
+
+    /// @notice Gets the facet that supports the given selector.
+    /// @dev If facet is not found return address(0).
+    /// @param _functionSelector The function selector.
+    /// @return facetAddress_ The facet address.
+    function facetAddress(bytes4 _functionSelector) external view returns (address facetAddress_);
 }

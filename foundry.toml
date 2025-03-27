@@ -1,7 +1,11 @@
 [profile.default]
-src = "contracts" 
+src = "src"
 out = "out"
-test = "test"
 libs = ["lib"]
-
-# See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
+ffi=true
+verbosity=5
+openzeppelin-contracts = { path = "lib/openzeppelin-contracts"}
+remmaping = [[
+    "@openzeppelin/=lib/openzeppelin-contracts/",
+    "@arachnid/=lib/solidity-stringutils/src/",
+]]

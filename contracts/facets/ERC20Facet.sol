@@ -1,123 +1,163 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import {IERC20} from "../interfaces/IERC20.sol";
-import {AppStorage} from "../libraries/AppStorage.sol";
-import {IStakingFacet} from "../interfaces/IStakingFacet.sol";
+import {LibAppStorage} from "../libraries/LibAppStorage.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-/// @title ERC20RewardFacet
-/// @notice This contract allows users to stake, withdraw, and claim rewards from ERC20 tokens.
-///         It also distributes rewards based on the total amount of tokens staked (ERC20, ERC721, ERC1155).
-/// @dev This contract interacts with the AppStorage to store information about staking and rewards.
-abstract contract ERC20Facet is IStakingFacet {
+interface IDiamondERC20 {
+    function mint(address to, uint256 amount) external;
+}
 
-    // Track users who have staked ERC20, ERC721, or ERC1155 tokens
-    address[] public users;
+contract ERC20Stacking {
+    
+    uint256 public constant SECONDS_PER_YEAR = 31_536_000;
 
-    /// @notice Stake ERC20 tokens into the contract
-    /// @dev Transfers ERC20 tokens from the user's address to the contract and updates the staking record
-    /// @param token The address of the ERC20 token being staked
-    /// @param amount The amount of the ERC20 token to stake
-    function stakeERC20(address token, uint256 amount) external override {
-        AppStorage.Storage storage s = AppStorage.getStorage();
+    event Staked(address indexed staker, uint256 indexed amount);
+    event Withdraw(
+        address indexed staker,
+        uint256 indexed amountToBeTransferred,
+        uint256 rewardYield
+    );
 
-        // Transfer ERC20 token to contract
-        IERC20(token).transferFrom(msg.sender, address(this), amount);
-
-        // Update staking record
-        s.stakesERC20[msg.sender] += amount;
-
-        // Update total staked ERC20 tokens
-        s.totalStakedERC20 += amount;
-
-        // Add user to the list if they haven't staked before
-        if (s.stakesERC20[msg.sender] == amount) {
-            users.push(msg.sender);
-        }
+    function setERC20Token(address _erc20Token) external {
+        require(_erc20Token != address(0), "Invalid token address");
+        LibAppStorage.AppStorage storage s = LibAppStorage.appStorage();
+        s.erc20Token = _erc20Token;
     }
 
-    /// @notice Withdraw ERC20 tokens from the contract
-    /// @dev Transfers ERC20 tokens from the contract back to the user's address and updates the staking record
-    /// @param token The address of the ERC20 token being withdrawn
-    /// @param amount The amount of the ERC20 token to withdraw
-    function withdrawERC20(address token, uint256 amount) external override {
-        AppStorage.Storage storage s = AppStorage.getStorage();
+    function stakeERC20(uint256 _amount) external {
+        LibAppStorage.AppStorage storage s = LibAppStorage.appStorage();
+        require(_amount > 0, "zero value isn't allowed");
+        require(
+            s.noOfdays > 0,
+            "State the duration you want to stake your token"
+        );
 
-        require(s.stakesERC20[msg.sender] >= amount, "Insufficient balance");
+        require(
+            IERC20(s.erc20Token).allowance(msg.sender, address(this)) >=
+                _amount,
+            "ERC20: Transfer amount exceeds allowance"
+        );
 
-        // Transfer ERC20 tokens back to the user
-        IERC20(token).transfer(msg.sender, amount);
+        s.erc20Stakes[msg.sender] += _amount;
+        s.erc20StakeTimestamp[msg.sender] = block.timestamp;
+        s.created = true;
 
-        // Update staking record
-        s.stakesERC20[msg.sender] -= amount;
+        IERC20(s.erc20Token).transferFrom(msg.sender, address(this), _amount);
 
-        // Update total staked ERC20 tokens
-        s.totalStakedERC20 -= amount;
+        emit Staked(msg.sender, _amount);
     }
 
-    /// @notice Distribute rewards to users based on their total stake
-    /// @dev This function calculates the total rewards based on the staking of ERC20, ERC721, and ERC1155 tokens
-    ///      and updates the reward per stake.
-    /// @param rewardToken The address of the reward token that will be distributed
-    function distributeRewards(address rewardToken) external  {
-        AppStorage.Storage storage s = AppStorage.getStorage();
-
-        uint256 totalStakedERC20 = s.totalStakedERC20;
-        uint256 totalStakedERC721 = 0;
-        uint256 totalStakedERC1155 = 0;
-
-        // Calculate total staked ERC721 and ERC1155 tokens for all users
-        for (uint256 i = 0; i < users.length; i++) {
-            address user = users[i];
-
-            // ERC721: Loop through tokenIds (assuming a max of 10000 tokenIds)
-            for (uint256 tokenId = 0; tokenId < 10000; tokenId++) {
-                totalStakedERC721 += s.stakesERC721[user][tokenId];
-            }
-
-            // ERC1155: Loop through tokenIds (assuming a max of 10000 tokenIds)
-            for (uint256 tokenId = 0; tokenId < 10000; tokenId++) {
-                totalStakedERC1155 += s.stakesERC1155[user][tokenId];
-            }
-        }
-
-        uint256 totalStaked = totalStakedERC20 + totalStakedERC721 + totalStakedERC1155;
-        require(totalStaked > 0, "No tokens staked");
-
-        uint256 rewardAmount = s.rewardRate * totalStaked;
-
-        // Transfer reward token from sender to this contract
-        require(IERC20(rewardToken).transferFrom(msg.sender, address(this), rewardAmount), "Transfer failed");
-
-        // Update reward per stake
-        s.rewardPerStake += rewardAmount / totalStaked;
+    function getBalance() public view returns (uint256) {
+        LibAppStorage.AppStorage storage s = LibAppStorage.appStorage();
+        return s.erc20Stakes[msg.sender];
     }
 
-    /// @notice Claim rewards based on the user's staked tokens
-    /// @dev The function calculates the rewards for ERC20, ERC721, and ERC1155 staked tokens and sends them to the user
-    /// @param rewardToken The address of the reward token that will be transferred to the user
-    function claimRewards(address rewardToken) external  {
-        AppStorage.Storage storage s = AppStorage.getStorage();
-        uint256 reward = s.rewardPerStake * s.stakesERC20[msg.sender];
+    function withdrawToken() external {
+        LibAppStorage.AppStorage storage s = LibAppStorage.appStorage();
 
-        // Add the rewards from ERC721 and ERC1155 stakes
-        uint256 erc721Reward = 0;
-        uint256 erc1155Reward = 0;
+        // Get user's staked balance
+        uint256 userBalance = s.erc20Stakes[msg.sender];
+        require(userBalance > 0, "You have no staked tokens");
 
-        // Calculate ERC721 rewards (assuming tokenId range from 0 to 9999)
-        for (uint256 tokenId = 0; tokenId < 10000; tokenId++) {
-            erc721Reward += s.stakesERC721[msg.sender][tokenId];
+        require(!s.erc20Withdrawn[msg.sender], "You have already withdrawn");
+
+        // Check staking duration
+        require(
+            block.timestamp >= s.erc20StakeTimestamp[msg.sender] + s.noOfdays,
+            "Staking duration not met"
+        );
+
+        // Calculate reward
+        uint256 rewardYield = calculateReward();
+
+        // Ensure the staking contract has enough reward tokens
+        require(
+            s.erc20RewardToken != address(0),
+            "Reward token not configured"
+        );
+        require(
+            IERC20(s.erc20RewardToken).balanceOf(address(this)) >= rewardYield,
+            "Insufficient reward tokens"
+        );
+
+        // Reset state BEFORE transfers
+        s.erc20Stakes[msg.sender] = 0;
+        s.erc20Withdrawn[msg.sender] = true;
+
+        // Transfer back staked tokens
+        IERC20(s.erc20Token).transfer(msg.sender, userBalance);
+
+        // Mint reward tokens
+        IDiamondERC20(s.erc20RewardToken).mint(msg.sender, rewardYield);
+
+        emit Withdraw(msg.sender, userBalance, rewardYield);
+    }
+
+    function calculateReward() public view returns (uint256) {
+        LibAppStorage.AppStorage storage s = LibAppStorage.appStorage();
+
+        // Check if there's an active stake
+        if (
+            s.erc20Stakes[msg.sender] == 0 ||
+            s.erc20StakeTimestamp[msg.sender] == 0
+        ) {
+            return 0;
         }
 
-        // Calculate ERC1155 rewards (assuming tokenId range from 0 to 9999)
-        for (uint256 tokenId = 0; tokenId < 10000; tokenId++) {
-            erc1155Reward += s.stakesERC1155[msg.sender][tokenId];
+        uint256 totalStaked = s.erc20Stakes[msg.sender];
+        uint256 timeElapsed = block.timestamp -
+            s.erc20StakeTimestamp[msg.sender];
+
+        // Ensure staking duration is met
+        if (timeElapsed < s.noOfdays) {
+            return 0;
         }
 
-        // Add rewards from ERC721 and ERC1155 tokens
-        reward += (s.rewardPerStake * erc721Reward) + (s.rewardPerStake * erc1155Reward);
+        // Use the constant SECONDS_PER_YEAR instead of redeclaring it
+        uint256 baseReward = (totalStaked * s.apr * timeElapsed) /
+            SECONDS_PER_YEAR;
 
-        // Transfer the accumulated reward to the staker
-        require(IERC20(rewardToken).transfer(msg.sender, reward), "Transfer failed");
+        // Apply decay (ensures decay is never negative)
+        uint256 decayFactor = (100 - s.decayRate);
+        uint256 finalReward = (baseReward * decayFactor) / 100;
+
+        return finalReward;
+    }
+
+    function getERC20Token() external view returns (address) {
+        LibAppStorage.AppStorage storage s = LibAppStorage.appStorage();
+        return s.erc20Token;
+    }
+
+    function setStakingDuration(uint256 _days) external {
+        require(_days > 0, "Duration must be greater than zero");
+        LibAppStorage.AppStorage storage s = LibAppStorage.appStorage();
+        s.noOfdays = _days;
+    }
+
+    function getContractBalance() public view returns (uint256) {
+        LibAppStorage.AppStorage storage s = LibAppStorage.appStorage();
+        return IERC20(s.erc20Token).balanceOf(address(this));
+    }
+
+    function getCalculateReward() public view returns (uint256) {
+        return calculateReward();
+    }
+
+    function setAPR(uint256 _apr) external {
+        LibAppStorage.AppStorage storage s = LibAppStorage.appStorage();
+        s.apr = _apr;
+    }
+
+    function setDecayRate(uint256 _decayRate) external {
+        LibAppStorage.AppStorage storage s = LibAppStorage.appStorage();
+        s.decayRate = _decayRate;
+    }
+
+    function setRewardToken(address _rewardToken) external {
+        require(_rewardToken != address(0), "Invalid reward token address");
+        LibAppStorage.AppStorage storage s = LibAppStorage.appStorage();
+        s.erc20RewardToken = _rewardToken;
     }
 }
