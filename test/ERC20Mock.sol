@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import {IERC20} from "../contracts/interfaces/IERC20.sol";
+import {IERC20} from "../contracts/interfaces/IERC20.sol";  
 
 contract ERC20Mock is IERC20 {
     string public name = "Mock ERC20";
@@ -34,6 +34,10 @@ contract ERC20Mock is IERC20 {
         return true;
     }
 
+    function allowance(address owner, address spender) external view override returns (uint256) {
+    return allowances[owner][spender];
+    }
+
     function transferFrom(address sender, address recipient, uint256 amount) public override returns (bool) {
         require(balances[sender] >= amount, "Insufficient balance");
         require(allowances[sender][msg.sender] >= amount, "Allowance exceeded");
@@ -43,12 +47,4 @@ contract ERC20Mock is IERC20 {
         emit Transfer(sender, recipient, amount);
         return true;
     }
-
-    // Implementing missing allowance function
-    function allowance(address owner, address spender) public view override returns (uint256) {
-        return allowances[owner][spender];
-    }
-
-    event Transfer(address indexed from, address indexed to, uint256 value);
-    event Approval(address indexed owner, address indexed spender, uint256 value);
 }

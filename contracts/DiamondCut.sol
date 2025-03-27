@@ -1,12 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import {IDiamondCut} from "./interfaces/IDiamondCut.sol"; // Interface for DiamondCut
+import {IDiamondCut} from "./interfaces/IDiamondCut.sol"; 
 
 /// @title DiamondCut Contract
 /// @notice This contract is responsible for adding, removing, or replacing facets in a Diamond contract.
 /// @dev The DiamondCut contract implements the `IDiamondCut` interface, enabling modification of facets dynamically.
 contract DiamondCut is IDiamondCut {
+    
     // map facet addresses to function selectors
     mapping(address => bytes4[]) public facetFunctionSelectors;
 
@@ -15,9 +16,9 @@ contract DiamondCut is IDiamondCut {
 
     // Events for facet management
     event FacetAdded(address indexed facetAddress, bytes4[] functionSelectors);
-    event FacetReplaced(address indexed oldFacetAddress, address indexed newFacetAddress, bytes4[] functionSelectors); // Declare the event
+    event FacetReplaced(address indexed oldFacetAddress, address indexed newFacetAddress, bytes4[] functionSelectors);
     event FacetRemoved(address indexed facetAddress, bytes4[] functionSelectors);
-    event FacetInitialized(address indexed facetAddress); // Event for facet initialization
+    event FacetInitialized(address indexed facetAddress);  
 
     /// @notice Adds, replaces, or removes facets in the Diamond contract
     /// @dev This function allows for dynamic updates to the Diamond contract's facets.
@@ -26,24 +27,30 @@ contract DiamondCut is IDiamondCut {
     /// @param _diamondCut An array of `FacetCut` structs that define the facets and the action to perform on each
     /// @param _init The address of the contract to initialize after facet updates (optional)
     /// @param _calldata The calldata to be passed to the initializer contract (if `_init` is not `address(0)`)
-    function diamondCut(FacetCut[] calldata _diamondCut, address _init, bytes calldata _calldata) external override {
+    function diamondCut(
+        FacetCut[] calldata _diamondCut,
+        address _init,
+        bytes calldata _calldata
+    ) external override {
         // Loop through each facet cut and execute the corresponding action
-        for (uint256 i = 0; i < _diamondCut.length; i++) {
+        for (uint i = 0; i < _diamondCut.length; i++) {
             FacetCut memory cut = _diamondCut[i];
-            if (cut.action == FacetCutAction.Add) {
+            
+            // Use integer comparison for enum values
+            if (uint8(cut.action) == uint8(FacetCutAction.Add)) {
                 _addFacet(cut.facetAddress, cut.functionSelectors);
-            } else if (cut.action == FacetCutAction.Replace) {
+            } else if (uint8(cut.action) == uint8(FacetCutAction.Replace)) {
                 _replaceFacet(cut.facetAddress, cut.functionSelectors);
-            } else if (cut.action == FacetCutAction.Remove) {
+            } else if (uint8(cut.action) == uint8(FacetCutAction.Remove)) {
                 _removeFacet(cut.facetAddress, cut.functionSelectors);
             }
         }
 
         // If an initializer contract is provided, perform the delegatecall for initialization
         if (_init != address(0)) {
-            (bool success,) = _init.delegatecall(_calldata);
+            (bool success, ) = _init.delegatecall(_calldata);
             require(success, "DiamondCut: Initialization failed");
-            emit FacetInitialized(_init); // Emit the event for facet initialization
+            emit FacetInitialized(_init);  // Emit the event for facet initialization
         }
     }
 
@@ -55,7 +62,7 @@ contract DiamondCut is IDiamondCut {
     function _addFacet(address _facetAddress, bytes4[] memory _functionSelectors) internal {
         require(_facetAddress != address(0), "DiamondCut: Facet address cannot be zero");
 
-        for (uint256 i = 0; i < _functionSelectors.length; i++) {
+        for (uint i = 0; i < _functionSelectors.length; i++) {
             bytes4 selector = _functionSelectors[i];
             // Ensure the selector isn't already in use by another facet
             require(selectorToFacet[selector] == address(0), "DiamondCut: Function selector already in use");
@@ -78,7 +85,7 @@ contract DiamondCut is IDiamondCut {
     function _replaceFacet(address _facetAddress, bytes4[] memory _functionSelectors) internal {
         require(_facetAddress != address(0), "DiamondCut: Facet address cannot be zero");
 
-        for (uint256 i = 0; i < _functionSelectors.length; i++) {
+        for (uint i = 0; i < _functionSelectors.length; i++) {
             bytes4 selector = _functionSelectors[i];
             address existingFacet = selectorToFacet[selector];
             require(existingFacet != address(0), "DiamondCut: Selector not found");
@@ -94,7 +101,7 @@ contract DiamondCut is IDiamondCut {
             facetFunctionSelectors[_facetAddress].push(selector);
         }
 
-        // emit FacetReplaced(existingFacet, _facetAddress, _functionSelectors);
+        // emit FacetReplaced(existingFacet, _facetAddress, _functionSelectors); 
     }
 
     /// @notice Internal function to remove a facet from the Diamond contract
@@ -105,7 +112,7 @@ contract DiamondCut is IDiamondCut {
     function _removeFacet(address _facetAddress, bytes4[] memory _functionSelectors) internal {
         require(_facetAddress != address(0), "DiamondCut: Facet address cannot be zero");
 
-        for (uint256 i = 0; i < _functionSelectors.length; i++) {
+        for (uint i = 0; i < _functionSelectors.length; i++) {
             bytes4 selector = _functionSelectors[i];
             require(selectorToFacet[selector] == _facetAddress, "DiamondCut: Function selector not found");
 
@@ -125,7 +132,7 @@ contract DiamondCut is IDiamondCut {
     /// @param _selector The function selector to remove
     function _removeFromFacetSelectorList(address _facetAddress, bytes4 _selector) internal {
         bytes4[] storage selectors = facetFunctionSelectors[_facetAddress];
-        for (uint256 i = 0; i < selectors.length; i++) {
+        for (uint i = 0; i < selectors.length; i++) {
             if (selectors[i] == _selector) {
                 selectors[i] = selectors[selectors.length - 1];
                 selectors.pop();

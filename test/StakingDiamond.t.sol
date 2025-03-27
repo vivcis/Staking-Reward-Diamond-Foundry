@@ -14,7 +14,7 @@ import "../test/ERC20Mock.sol";
 contract StakingDiamondTest is Test {
     Diamond diamond;
     StakingFacet stakingFacet;
-    ERC20RewardFacet rewardFacet;
+    ERC20Facet rewardFacet;
     ERC20Mock rewardToken;
 
     address[] facets;
@@ -25,7 +25,7 @@ contract StakingDiamondTest is Test {
 
         // Deploy facets
         stakingFacet = new StakingFacet();
-        rewardFacet = new ERC20RewardFacet();
+        rewardFacet = new ERC20Facet();
         DiamondLoupeFacet diamondLoupeFacet = new DiamondLoupeFacet();
 
         // Initialize facets (like setting the reward rate in AppStorage)

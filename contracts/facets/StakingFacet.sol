@@ -61,7 +61,7 @@ contract StakingFacet is IStakingFacet {
         IERC721(token).safeTransferFrom(msg.sender, address(this), tokenId);
 
         // Update the staking record for the user
-        s.stakesERC721[msg.sender][tokenId] = 1; // Storing a value of 1 for simplicity
+        s.stakesERC721[msg.sender][tokenId] = 1; 
         s.totalStakedERC721 += 1;
     }
 
