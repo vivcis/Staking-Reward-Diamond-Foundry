@@ -2,6 +2,7 @@
 pragma solidity ^0.8.0;
 
 import {IDiamondCut} from "./interfaces/IDiamondCut.sol"; 
+import {LibDiamond} from "./libraries/LibDiamond.sol";
 
 /// @title DiamondCut Contract
 /// @notice This contract is responsible for adding, removing, or replacing facets in a Diamond contract.
